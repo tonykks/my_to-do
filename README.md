@@ -1,34 +1,74 @@
 # Todo App
 
-## 프로젝트 소개
-Vanilla JavaScript 기반의 간단한 Todo App입니다.  
-데이터(Array) 변경 후 렌더링(Render)으로 UI를 동기화하는 구조를 중심으로 구현했습니다.
+HTML, CSS, **Vanilla JavaScript**만으로 동작하는 할 일 관리 앱입니다.  
+상태는 `todos` 배열로 관리하고, 변경 시 `renderTodos()`로 목록과 통계를 다시 그립니다.  
+`localStorage`에 저장해 새로고침 후에도 데이터가 유지됩니다.
+
+## 프로젝트 구조
+
+```
+todo-app/
+├── index.html
+├── style.css
+└── script.js
+```
 
 ## 주요 기능
-- Todo 추가 (빈 값 입력 방지, trim 처리)
-- Todo 목록 렌더링
-- 완료/미완료 토글
-- Todo 삭제
-- 남은 Todo 개수 표시
-- LocalStorage 저장/복원
+
+| 기능 | 설명 |
+|------|------|
+| 할 일 추가 | 입력 후 **추가** 버튼 또는 **Enter**로 추가. 앞뒤 공백 제거(`trim`), 빈 문자열은 무시. 추가 후 입력창 비우고 포커스 유지 |
+| 완료 토글 | 할 일 **텍스트**를 클릭하면 완료/미완료 전환. 완료 시 취소선·흐림(`.completed`) 및 행 배경(`.todo-item--done`) |
+| 삭제 | 각 항목의 **삭제** 버튼으로 해당 Todo만 제거 |
+| 통계 | **완료** 개수, **남은 할 일** 개수(`completed === false`), **전체** 개수를 푸터에 실시간 표시 |
+| 데이터 유지 | 브라우저 `localStorage` 키 `todos`에 `JSON.stringify`로 저장, 시작 시 `JSON.parse`로 복원 |
+
+## HTML 요소 (스크립트 연동)
+
+스크립트에서 참조하는 주요 ID는 다음과 같습니다.
+
+- `#todo-input` — 입력 필드  
+- `#add-btn` — 추가 버튼  
+- `#todo-list` — Todo 목록(`<ul>`)  
+- `#todo-count-completed` — 완료 개수  
+- `#todo-count-remaining` — 남은 할 일 개수  
+- `#todo-count-total` — 전체 개수  
+
+## Todo 데이터 형식
+
+각 항목은 아래 형태의 객체입니다.
+
+```js
+{
+  id: number,        // 고유 식별자
+  text: string,      // 할 일 내용
+  completed: boolean // 완료 여부
+}
+```
+
+전체 목록은 위 객체의 배열로 관리됩니다.
+
+## 구현 방식 요약
+
+- **렌더링**: `renderTodos()`에서 목록을 비운 뒤 배열을 순회해 DOM을 다시 생성하고, 마지막에 `updateCount()`로 통계를 갱신합니다.  
+- **이벤트 위임**: `#todo-list`에 클릭 리스너를 두고, `.delete-button` / `.todo-text`에 따라 삭제·토글을 처리합니다.  
+- **저장소**: `saveTodos()` / `loadTodos()`로 `localStorage` 동기화. 손상·형식 오류 시 빈 배열로 안전하게 초기화합니다.
+
+## 기술 스택
+
+- HTML5  
+- CSS3 (반응형: 좁은 화면에서 입력 영역 세로 배치)  
+- Vanilla JavaScript (ES6+, 외부 라이브러리 없음)
 
 ## 실행 방법
-1. `todo-app` 폴더로 이동합니다.
-2. `index.html` 파일을 브라우저에서 엽니다.
-3. 입력창에 할 일을 입력하고 추가/완료/삭제 기능을 사용합니다.
 
-## 사용 기술
-- HTML5
-- CSS3
-- Vanilla JavaScript (ES6+)
-- LocalStorage
+1. `todo-app` 폴더의 `index.html`을 브라우저에서 엽니다.  
+2. 할 일을 입력하고 추가·완료 토글·삭제를 사용합니다.  
+3. 페이지를 새로고침해도 마지막으로 저장된 목록이 복원되는지 확인할 수 있습니다.
 
-## AI 활용 기록
-- 요구사항 기반으로 파일 구조를 생성했습니다.
-- 기능 단위 함수 분리(`addTodo`, `renderTodos`, `toggleTodo`, `deleteTodo`, `updateCount`)를 적용했습니다.
-- 예외 처리(빈 입력, 잘못된 id, 배열 상태 방어)를 반영했습니다.
+> 로컬 파일로 열 때도 대부분의 브라우저에서 동일 출처로 `localStorage`가 동작합니다.
 
-## 회고
-- 데이터 상태를 기준으로 UI를 다시 그리는 구조가 유지보수에 유리했습니다.
-- 함수 분리를 통해 기능별 책임이 명확해졌고 디버깅이 쉬워졌습니다.
-- LocalStorage를 추가해 새로고침 이후에도 상태를 유지할 수 있었습니다.
+## 스타일 참고
+
+- 완료된 텍스트: `.completed` — `text-decoration: line-through`, `opacity: 0.5`  
+- 완료된 행 배경: `.todo-item--done`

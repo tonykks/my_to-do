@@ -1,117 +1,133 @@
+const STORAGE_KEY = "todos";
+
+/** @type {{ id: number, text: string, completed: boolean }[]} */
 let todos = [];
 
-const todoInput = document.getElementById("todoInput");
-const addButton = document.getElementById("addButton");
-const todoList = document.getElementById("todoList");
-const todoCount = document.getElementById("todoCount");
+const todoInput = document.getElementById("todo-input");
+const addBtn = document.getElementById("add-btn");
+const todoList = document.getElementById("todo-list");
+const todoCountCompletedEl = document.getElementById("todo-count-completed");
+const todoCountRemainingEl = document.getElementById("todo-count-remaining");
+const todoCountTotalEl = document.getElementById("todo-count-total");
 
 function loadTodos() {
   try {
-    const stored = localStorage.getItem("todos");
+    const stored = localStorage.getItem(STORAGE_KEY);
     if (!stored) {
       todos = [];
       return;
     }
-
     const parsed = JSON.parse(stored);
-    todos = Array.isArray(parsed) ? parsed : [];
-  } catch (error) {
+    if (!Array.isArray(parsed)) {
+      todos = [];
+      return;
+    }
+    todos = parsed.filter(isValidTodo);
+  } catch {
     todos = [];
   }
+}
+
+function isValidTodo(item) {
+  return (
+    item != null &&
+    typeof item === "object" &&
+    typeof item.id === "number" &&
+    typeof item.text === "string" &&
+    typeof item.completed === "boolean"
+  );
+}
+
+function nextId() {
+  if (!todos.length) return Date.now();
+  return Math.max(...todos.map((t) => t.id)) + 1;
 }
 
 function saveTodos() {
-  localStorage.setItem("todos", JSON.stringify(todos));
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(todos));
 }
 
-function addTodo(text) {
-  if (!Array.isArray(todos)) {
-    todos = [];
-  }
+function getRemainingCount() {
+  return todos.filter((t) => !t.completed).length;
+}
 
-  if (typeof text !== "string") {
-    return;
-  }
+function getCompletedCount() {
+  return todos.filter((t) => t.completed).length;
+}
 
-  const trimmed = text.trim();
-  if (!trimmed) {
-    return;
+function updateCount() {
+  const completed = getCompletedCount();
+  const remaining = getRemainingCount();
+  const total = todos.length;
+
+  if (todoCountCompletedEl) {
+    todoCountCompletedEl.textContent = `완료: ${completed}`;
   }
+  if (todoCountRemainingEl) {
+    todoCountRemainingEl.textContent = `남은 할 일: ${remaining}`;
+  }
+  if (todoCountTotalEl) {
+    todoCountTotalEl.textContent = `전체: ${total}`;
+  }
+}
+
+function addTodo() {
+  if (!todoInput) return;
+  const trimmed = todoInput.value.trim();
+  if (!trimmed) return;
 
   todos.push({
-    id: Date.now() + Math.floor(Math.random() * 1000),
+    id: nextId(),
     text: trimmed,
     completed: false,
   });
 
   saveTodos();
   renderTodos();
+  todoInput.value = "";
+  todoInput.focus();
 }
 
 function toggleTodo(id) {
-  if (!Array.isArray(todos) || typeof id !== "number") {
-    return;
-  }
-
-  todos = todos.map((todo) => {
-    if (todo.id === id) {
-      return { ...todo, completed: !todo.completed };
-    }
-    return todo;
-  });
-
+  const numId = Number(id);
+  const todo = todos.find((t) => t.id === numId);
+  if (!todo) return;
+  todo.completed = !todo.completed;
   saveTodos();
   renderTodos();
 }
 
 function deleteTodo(id) {
-  if (!Array.isArray(todos) || typeof id !== "number") {
-    return;
-  }
-
-  todos = todos.filter((todo) => todo.id !== id);
+  const numId = Number(id);
+  todos = todos.filter((t) => t.id !== numId);
   saveTodos();
   renderTodos();
 }
 
-function updateCount() {
-  if (!Array.isArray(todos)) {
-    todoCount.textContent = "남은 할 일: 0";
-    return;
-  }
-
-  const remaining = todos.filter((todo) => !todo.completed).length;
-  todoCount.textContent = `남은 할 일: ${remaining}`;
-}
-
 function renderTodos() {
-  if (!todoList) {
-    return;
-  }
+  if (!todoList) return;
 
   todoList.innerHTML = "";
-
-  if (!Array.isArray(todos)) {
-    todos = [];
-  }
 
   todos.forEach((todo) => {
     const item = document.createElement("li");
     item.className = "todo-item";
+    item.dataset.id = String(todo.id);
+    if (todo.completed) {
+      item.classList.add("todo-item--done");
+    }
 
     const text = document.createElement("span");
     text.className = "todo-text";
+    text.textContent = todo.text;
     if (todo.completed) {
       text.classList.add("completed");
     }
-    text.textContent = todo.text;
-    text.addEventListener("click", () => toggleTodo(todo.id));
 
     const deleteButton = document.createElement("button");
     deleteButton.className = "delete-button";
     deleteButton.type = "button";
     deleteButton.textContent = "삭제";
-    deleteButton.addEventListener("click", () => deleteTodo(todo.id));
 
     item.appendChild(text);
     item.appendChild(deleteButton);
@@ -121,20 +137,39 @@ function renderTodos() {
   updateCount();
 }
 
-addButton.addEventListener("click", () => {
-  addTodo(todoInput.value);
-  todoInput.value = "";
-  todoInput.focus();
-});
+function initEventListeners() {
+  addBtn?.addEventListener("click", () => {
+    addTodo();
+  });
 
-todoInput.addEventListener("keydown", (event) => {
-  if (event.key !== "Enter") {
-    return;
-  }
+  todoInput?.addEventListener("keydown", (event) => {
+    if (event.key !== "Enter") return;
+    event.preventDefault();
+    addTodo();
+  });
 
-  addTodo(todoInput.value);
-  todoInput.value = "";
-});
+  todoList?.addEventListener("click", (event) => {
+    const target = event.target;
+    if (!(target instanceof Element)) return;
+
+    const deleteBtn = target.closest(".delete-button");
+    if (deleteBtn) {
+      event.stopPropagation();
+      const row = deleteBtn.closest(".todo-item");
+      const id = row?.dataset.id;
+      if (id != null) deleteTodo(id);
+      return;
+    }
+
+    const textEl = target.closest(".todo-text");
+    if (textEl) {
+      const row = textEl.closest(".todo-item");
+      const id = row?.dataset.id;
+      if (id != null) toggleTodo(id);
+    }
+  });
+}
 
 loadTodos();
+initEventListeners();
 renderTodos();

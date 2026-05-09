@@ -68,6 +68,12 @@ todo-app/
 
 > 로컬 파일로 열 때도 대부분의 브라우저에서 동일 출처로 `localStorage`가 동작합니다.
 
+## GitHub Pages 배포
+
+프로젝트 사이트 주소가 `https://사용자.github.io/저장소이름/`처럼 **하위 경로**일 때, 주소가 `.../저장소이름`(끝 슬래시 없음)으로 열리면 브라우저가 `style.css` 같은 상대 경로를 사이트 루트(`github.io/style.css`)로 잘못 해석해 **CSS·JS가 404**가 나는 경우가 있습니다. 그러면 입력창만 보이고 버튼 스타일·스크립트가 적용되지 않습니다.
+
+이 프로젝트는 `<head>` 안에서 현재 경로에 맞게 `<base href="...">`를 넣어, `style.css`와 `script.js`가 항상 **이 페이지가 있는 폴더** 기준으로 로드되도록 했습니다. 저장소 루트에 `index.html`, `style.css`, `script.js`를 두고 Pages 소스를 해당 브랜치(또는 `/docs`)로 지정하면 동일하게 동작합니다.
+
 ## 스타일 참고
 
 - 완료된 텍스트: `.completed` — `text-decoration: line-through`, `opacity: 0.5`  

@@ -30,9 +30,7 @@ todo-app/
 - `#todo-input` — 입력 필드  
 - `#add-btn` — 추가 버튼  
 - `#todo-list` — Todo 목록(`<ul>`)  
-- `#todo-count-completed` — 완료 개수  
-- `#todo-count-remaining` — 남은 할 일 개수  
-- `#todo-count-total` — 전체 개수  
+- `#todo-stats` — 통계 한 줄(완료 · 남은 할 일 · 전체). `updateCount()`에서 `textContent`로 갱신  
 
 ## Todo 데이터 형식
 

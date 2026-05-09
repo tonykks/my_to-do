@@ -112,17 +112,8 @@ body {
 }
 
 .todo-stats {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 6px 10px;
   margin: 0;
   line-height: 1.5;
-}
-
-.todo-stats__sep {
-  color: #c7ccd6;
-  user-select: none;
 }
 
 @media (max-width: 480px) {

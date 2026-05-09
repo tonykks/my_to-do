@@ -6,7 +6,9 @@ let todos = [];
 const todoInput = document.getElementById("todo-input");
 const addBtn = document.getElementById("add-btn");
 const todoList = document.getElementById("todo-list");
-const todoStatsEl = document.getElementById("todo-stats");
+const todoCountCompletedEl = document.getElementById("todo-count-completed");
+const todoCountRemainingEl = document.getElementById("todo-count-remaining");
+const todoCountTotalEl = document.getElementById("todo-count-total");
 
 function loadTodos() {
   try {
@@ -57,10 +59,15 @@ function updateCount() {
   const completed = getCompletedCount();
   const remaining = getRemainingCount();
   const total = todos.length;
-  const line = `완료: ${completed} · 남은 할 일: ${remaining} · 전체: ${total}`;
 
-  if (todoStatsEl) {
-    todoStatsEl.textContent = line;
+  if (todoCountCompletedEl) {
+    todoCountCompletedEl.textContent = `완료: ${completed}`;
+  }
+  if (todoCountRemainingEl) {
+    todoCountRemainingEl.textContent = `남은 할 일: ${remaining}`;
+  }
+  if (todoCountTotalEl) {
+    todoCountTotalEl.textContent = `전체: ${total}`;
   }
 }
 

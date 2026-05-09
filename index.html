@@ -16,13 +16,13 @@
       })();
     </script>
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Todo App</title>
+    <title>MyToDo App</title>
     <link rel="stylesheet" href="style.css" />
   </head>
   <body>
     <main class="app">
       <header class="app-header">
-        <h1>Todo App</h1>
+        <h1>MyToDo App</h1>
       </header>
 
       <section class="todo-input-section" aria-label="할 일 입력">
@@ -33,6 +33,29 @@
           autocomplete="off"
         />
         <button id="add-btn" type="button">추가</button>
+      </section>
+
+      <section class="todo-filter-section" aria-label="목록 필터">
+        <div
+          id="todo-filter-bar"
+          class="todo-filter-bar"
+          role="group"
+          aria-label="표시할 할 일 범위"
+        >
+          <button
+            type="button"
+            class="filter-btn filter-btn--active"
+            data-filter="all"
+          >
+            전체
+          </button>
+          <button type="button" class="filter-btn" data-filter="active">
+            남은 할 일
+          </button>
+          <button type="button" class="filter-btn" data-filter="completed">
+            완료
+          </button>
+        </div>
       </section>
 
       <section class="todo-list-section" aria-label="할 일 목록">

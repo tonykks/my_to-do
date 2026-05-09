@@ -1,4 +1,10 @@
 const STORAGE_KEY = "todos";
+const FILTER_STORAGE_KEY = "todo-filter";
+
+/** @type {"all" | "active" | "completed"} */
+let currentFilter = "all";
+
+const VALID_FILTERS = new Set(["all", "active", "completed"]);
 
 /** @type {{ id: number, text: string, completed: boolean }[]} */
 let todos = [];
@@ -9,6 +15,56 @@ const todoList = document.getElementById("todo-list");
 const todoCountCompletedEl = document.getElementById("todo-count-completed");
 const todoCountRemainingEl = document.getElementById("todo-count-remaining");
 const todoCountTotalEl = document.getElementById("todo-count-total");
+const todoFilterBar = document.getElementById("todo-filter-bar");
+
+function loadFilter() {
+  try {
+    const stored = localStorage.getItem(FILTER_STORAGE_KEY);
+    if (stored && VALID_FILTERS.has(stored)) {
+      currentFilter = /** @type {"all" | "active" | "completed"} */ (stored);
+    } else {
+      currentFilter = "all";
+    }
+  } catch {
+    currentFilter = "all";
+  }
+}
+
+function saveFilter() {
+  try {
+    localStorage.setItem(FILTER_STORAGE_KEY, currentFilter);
+  } catch {
+    /* ignore quota / private mode */
+  }
+}
+
+function setFilter(mode) {
+  if (!VALID_FILTERS.has(mode)) return;
+  currentFilter = /** @type {"all" | "active" | "completed"} */ (mode);
+  saveFilter();
+  renderTodos();
+}
+
+function todosMatchingFilter() {
+  if (currentFilter === "active") {
+    return todos.filter((t) => !t.completed);
+  }
+  if (currentFilter === "completed") {
+    return todos.filter((t) => t.completed);
+  }
+  return todos;
+}
+
+function syncFilterButtons() {
+  if (!todoFilterBar) return;
+  todoFilterBar.querySelectorAll(".filter-btn").forEach((btn) => {
+    if (!(btn instanceof HTMLButtonElement)) return;
+    const mode = btn.dataset.filter;
+    const isActive = mode === currentFilter;
+    btn.classList.toggle("filter-btn--active", isActive);
+    btn.setAttribute("aria-pressed", isActive ? "true" : "false");
+  });
+}
 
 function loadTodos() {
   try {
@@ -109,7 +165,26 @@ function renderTodos() {
 
   todoList.innerHTML = "";
 
-  todos.forEach((todo) => {
+  const visible = todosMatchingFilter();
+
+  if (visible.length === 0) {
+    const empty = document.createElement("li");
+    empty.className = "todo-list-empty";
+    empty.setAttribute("role", "status");
+    if (todos.length === 0) {
+      empty.textContent = "할 일이 없습니다.";
+    } else if (currentFilter === "completed") {
+      empty.textContent = "완료된 할 일이 없습니다.";
+    } else {
+      empty.textContent = "남은 할 일이 없습니다.";
+    }
+    todoList.appendChild(empty);
+    updateCount();
+    syncFilterButtons();
+    return;
+  }
+
+  visible.forEach((todo) => {
     const item = document.createElement("li");
     item.className = "todo-item";
     item.dataset.id = String(todo.id);
@@ -135,6 +210,7 @@ function renderTodos() {
   });
 
   updateCount();
+  syncFilterButtons();
 }
 
 function initEventListeners() {
@@ -146,6 +222,16 @@ function initEventListeners() {
     if (event.key !== "Enter") return;
     event.preventDefault();
     addTodo();
+  });
+
+  todoFilterBar?.addEventListener("click", (event) => {
+    const target = event.target;
+    if (!(target instanceof Element)) return;
+    const btn = target.closest("[data-filter]");
+    if (!(btn instanceof HTMLButtonElement)) return;
+    const mode = btn.dataset.filter;
+    if (!mode || !VALID_FILTERS.has(mode)) return;
+    setFilter(mode);
   });
 
   todoList?.addEventListener("click", (event) => {
@@ -171,5 +257,6 @@ function initEventListeners() {
 }
 
 loadTodos();
+loadFilter();
 initEventListeners();
 renderTodos();

@@ -56,6 +56,41 @@ body {
   background-color: #195ec9;
 }
 
+.todo-filter-section {
+  margin-top: 14px;
+}
+
+.todo-filter-bar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.filter-btn {
+  border: 1px solid #c7ccd6;
+  border-radius: 8px;
+  padding: 8px 14px;
+  background-color: #fff;
+  color: #222;
+  font-size: 0.9rem;
+  cursor: pointer;
+}
+
+.filter-btn:hover {
+  background-color: #f7f8fa;
+}
+
+.filter-btn--active {
+  background-color: #1f6feb;
+  border-color: #1f6feb;
+  color: #fff;
+}
+
+.filter-btn--active:hover {
+  background-color: #195ec9;
+  border-color: #195ec9;
+}
+
 .todo-list-section {
   margin-top: 16px;
 }
@@ -64,6 +99,18 @@ body {
   margin: 0;
   padding: 0;
   list-style: none;
+}
+
+.todo-list-empty {
+  margin: 0;
+  padding: 14px 12px;
+  list-style: none;
+  text-align: center;
+  font-size: 0.95rem;
+  color: #7a808b;
+  border: 1px dashed #dcdfe6;
+  border-radius: 8px;
+  background-color: #fafbfc;
 }
 
 .todo-item {
